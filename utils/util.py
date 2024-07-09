@@ -317,7 +317,7 @@ def save_ckpt(cfg, model, optimizer, epoch, train_loss, angle_loss, dist_loss, c
 
 
 def set_wandb(cfg):
-    wandb.login(key='7c9e87d5d253f5fe5a4a8b4d5f5e73fa6f7fd517')
+    wandb.login(key='##your key here##')
     wandb.init(project=cfg.project_name, tags=[cfg.dataset], name=cfg.experiment_name)
     wandb.config.update(cfg, allow_val_change=True)
     wandb.save('*.py')
