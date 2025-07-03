@@ -331,6 +331,8 @@ class Diffuser(object):
         self.X = X
         self.indx = indx
         self.extract_probs = extract_probs
+        self.probs_value = probs_value
+
 
         return
 

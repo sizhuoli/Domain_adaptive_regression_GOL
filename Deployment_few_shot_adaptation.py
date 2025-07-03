@@ -252,6 +252,8 @@ def validate(loader_dict, model, cfg, lim = 30):
                                                                                     return_preds = True,
                                                                                     return_diffuser=True)
 
+                    print('diffusion r2', r2)
+
                     r2_df.loc[itr, 'diffusion'] = r2
                     rmse_df.loc[itr, 'diffusion'] = rmse
 
@@ -316,7 +318,7 @@ if __name__ == "__main__":
 
     from config.cross_domain_fewshot import Config
     source_list = ['france']
-    infer_list = ['SP', 'slovakia', 'slovenia']
+    infer_list = ['slovenia']
     few_shot_list = [5]
 
     for few_shot_num in few_shot_list:

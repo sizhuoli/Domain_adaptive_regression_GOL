@@ -124,12 +124,12 @@ class Config:
 
 
         elif self.target == 'treecover5m':
-            self.statis = 'tree_cover_5m'
+            self.statis = 'tree_cover_5m(%)'
             self.rescale = 1 # set to 100 to rescale from 0-1 to 0-100
             self.upper_clip = 1.1 * self.rescale
             self.upper_bound = 1 * self.rescale
             self.lower_bound = 0.2 * self.rescale
-            self.attribute = 'tree_cover_5m'
+            self.attribute = 'tree_cover_5m(%)'
             self.infer_upper_clip = 1.1 * self.rescale
 
         else:

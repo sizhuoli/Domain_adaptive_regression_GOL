@@ -1019,6 +1019,8 @@ def query_diffusion_head(embs_test, embs_test_ref, test_labels_ref, test_ranks_r
     diffuser.diffuse_pred(embs_X, test_ranks_ref, test_labels_ref)
     preds_rank = diffuser.p_labels[len(test_ranks_ref):]
     preds_all = diffuser.p_values
+    prob_values = diffuser.probs_value
+    extract_probs = diffuser.extract_probs # sorted already!
 
     # map from log space to linear space
     if cfg.logscale:
@@ -1035,6 +1037,74 @@ def query_diffusion_head(embs_test, embs_test_ref, test_labels_ref, test_ranks_r
 
     else:
         preds_final = preds_all[len(test_ranks_ref):]
+
+
+    def draw_once(sd):
+        # split test data into 5 intervals
+        select_for_vis = []
+        for i in range(5):
+            idx = np.where(test_rank == i)[0]
+            np.random.seed(sd)
+            idx = np.random.choice(idx, 10, replace=False)
+            select_for_vis.append(idx)
+        select_for_vis = np.concatenate(select_for_vis)
+        select_for_vis_labels = test_labels[select_for_vis]
+        select_for_vis_preds = preds_final[select_for_vis]
+        select_for_vis_probs = prob_values[25:][select_for_vis]
+        # get the 5th largest value in each row
+        thres = np.sort(select_for_vis_probs, axis=1)[:, -3]
+        # for each row, set those below the threshold to 0
+        select_for_vis_probs[select_for_vis_probs < thres[:, None]] = 0
+
+        # normalize color rowwise
+        select_for_vis_probs_nm = (select_for_vis_probs - np.min(select_for_vis_probs, axis=1, keepdims=True)) / (np.max(select_for_vis_probs, axis=1, keepdims=True) - np.min(select_for_vis_probs, axis=1, keepdims=True))
+
+        subfig, ax = plt.subplots(1, 3, figsize=(15, 5))
+        # plot first
+        ax[0].matshow(select_for_vis_probs_nm, cmap='summer')
+
+        # convert test_labels to integer
+        test_labels_int = np.round(test_labels[select_for_vis]).astype(int)
+        # make onehot
+        test_labels_onehot = np.zeros((len(test_labels_int), max(test_labels_int) + 1))
+        test_labels_onehot[np.arange(len(test_labels_int)), test_labels_int] = 1
+        # plt.matshow(test_labels_onehot, cmap = 'summer')
+        ax[1].matshow(test_labels_onehot, cmap='summer')
+
+        # convert select_pred also to onehot
+        select_for_vis_preds_int = np.round(select_for_vis_preds).astype(int)
+        select_for_vis_preds_onehot = np.zeros((len(select_for_vis_preds_int), max(test_labels_int) + 1))
+        select_for_vis_preds_onehot[np.arange(len(select_for_vis_preds_int)), select_for_vis_preds_int] = 1
+        # plt.matshow(select_for_vis_preds_onehot, cmap = 'summer')
+        ax[2].matshow(select_for_vis_preds_onehot, cmap='summer')
+        # no ticks
+        for i in range(3):
+            ax[i].set_xticks([])
+            ax[i].set_yticks([])
+        plt.show()
+
+    # draw_once(10)
+    # s0 = np.zeros((75, 25))
+    # for j in range(25):
+    #     s0[j, j] = 1
+    # plt.matshow(s0, cmap='summer')
+    # # ticks off
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.show()
+
+
+
+
+
+
+
+    ipdb.set_trace()
+
+
+
+
+
 
     mae = np.mean(np.abs(test_labels - preds_final))
     rmse = np.sqrt(np.mean((test_labels - preds_final) ** 2))
